@@ -14,6 +14,7 @@ private:
 
 public:
 	Shader() = default;
+	~Shader() = default;
 	Shader(const std::string& vertexPath, const std::string& fragmentPath);
 	void use();
 };

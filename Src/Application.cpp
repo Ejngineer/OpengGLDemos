@@ -1,26 +1,13 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 #include "Shader.h"
+#include "VertexArray.h"
+#include "VertexBuffer.h"
+#include "IndexBuffer.h"
 
 
 #include <iostream>
 #include <string>
-
-const char* Vshader =
-    "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "   void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos, 1.0);\n"
-    "}\n";
-
-const char* Fshader =
-    "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);"
-    "}";
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
@@ -71,27 +58,29 @@ int main(void)
 
     const float vertices[] =
     {
+        //-z face
         -0.5f, -0.5f, 0.0f,
          0.5f, -0.5f, 0.0f,
-         0.0f, 0.5f, 0.0f
+         0.5f, 0.5f, 0.0f,
+        -0.5f, 0.5f, 0.0f
     };
 
-    unsigned int VAO;
-    unsigned int VBO;
+    const unsigned int Indices[] =
+    {
+        0,1,2,
+        2,3,0
+    };
 
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
-
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    VertexArray VAO;
+    VertexBuffer VBO(vertices, sizeof(vertices));
+    IndexBuffer IBO(Indices, sizeof(Indices));
 
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    VAO.UnBind();
+    VBO.UnBind();
+    IBO.UnBind();
 
     Shader TriShader("shaders/vertexshader.glsl", "shaders/fragmentshader.glsl");
 
@@ -105,10 +94,10 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT);
         glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
 
-        glBindVertexArray(VAO);
+        VAO.Bind();
         TriShader.use();
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-        glBindVertexArray(0);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        VAO.UnBind();
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
@@ -116,9 +105,6 @@ int main(void)
         /* Poll for and process events */
         glfwPollEvents();
     }
-    
-    glDeleteBuffers(1, &VBO);
-    glDeleteVertexArrays(1, &VAO);
 
     glfwTerminate();
     return 0;
