@@ -1,5 +1,6 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
+#include "Shader.h"
 
 
 #include <iostream>
@@ -68,48 +69,6 @@ int main(void)
 
     glViewport(0, 0, 1200, 900);
 
-    unsigned int vshader, fshader, program;
-
-    vshader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vshader, 1, &Vshader, NULL);
-    glCompileShader(vshader);
-
-    char infolog[512];
-    int success;
-
-    glGetShaderiv(vshader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(vshader, 512, NULL, infolog);
-        std::cout << "Failed to compile vertex shader. Error: " << infolog << std::endl;
-    }
-    
-    fshader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fshader, 1, &Fshader, NULL);
-    glCompileShader(fshader);
-
-    glGetShaderiv(vshader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetShaderInfoLog(vshader, 512, NULL, infolog);
-        std::cout << "Failed to compile fragment shader. Error: " << infolog << std::endl;
-    }
-
-    program = glCreateProgram();
-    glAttachShader(program, vshader);
-    glAttachShader(program, fshader);
-    glLinkProgram(program);
-
-    glDeleteShader(vshader);
-    glDeleteShader(fshader);
-
-    glGetProgramiv(program, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
-        glGetProgramInfoLog(program, 512, NULL, infolog);
-        std::cout << "Failed to link program. Error: " << infolog << std::endl;
-    }
-
     const float vertices[] =
     {
         -0.5f, -0.5f, 0.0f,
@@ -134,6 +93,8 @@ int main(void)
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+    Shader TriShader("shaders/vertexshader.glsl", "shaders/fragmentshader.glsl");
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -145,7 +106,7 @@ int main(void)
         glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
 
         glBindVertexArray(VAO);
-        glUseProgram(program);
+        TriShader.use();
         glDrawArrays(GL_TRIANGLES, 0, 3);
         glBindVertexArray(0);
 
