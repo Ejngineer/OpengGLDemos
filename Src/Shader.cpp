@@ -82,7 +82,43 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath)
 	}
 }
 
+void Shader::setInt1i(const char* uniform, int value)
+{
+	unsigned int loc = glGetUniformLocation(_ID, uniform);
+	glUniform1i(loc, value);
+}
+
+void Shader::setFloat1f(const char* uniform, float value)
+{
+	unsigned int loc = glGetUniformLocation(_ID, uniform);
+	glUniform1f(loc, value);
+}
+
 void Shader::use()
 {
 	glUseProgram(_ID);
+}
+
+void Shader::setInt3iv(const char* uniform, glm::vec3 values)
+{
+	unsigned int loc = glGetUniformLocation(_ID, uniform);
+	glUniform3i(loc, values.x, values.y, values.z);
+}
+
+void Shader::setInt3f(const char* uniform, float v0, float v1, float v2)
+{
+	unsigned int loc = glGetUniformLocation(_ID, uniform);
+	glUniform3f(loc, v0, v1, v2);
+}
+
+void Shader::setInt3fv(const char* uniform, glm::vec3 values)
+{
+	unsigned int loc = glGetUniformLocation(_ID, uniform);
+	glUniform3f(loc, values.x, values.y, values.z);
+}
+
+void Shader::setMat4f(const char* uniform, glm::mat4 mat)
+{
+	unsigned int loc = glGetUniformLocation(_ID, uniform);
+	glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(mat));
 }

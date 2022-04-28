@@ -152,6 +152,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Src\Application.cpp" />
+    <ClCompile Include="Src\Camera.cpp" />
     <ClCompile Include="Src\IndexBuffer.cpp" />
     <ClCompile Include="Src\Shader.cpp" />
     <ClCompile Include="Src\VertexArray.cpp" />
