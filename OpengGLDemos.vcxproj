@@ -153,6 +153,7 @@
   <ItemGroup>
     <ClCompile Include="Src\Application.cpp" />
     <ClCompile Include="Src\Camera.cpp" />
+    <ClCompile Include="Src\Cube.cpp" />
     <ClCompile Include="Src\IndexBuffer.cpp" />
     <ClCompile Include="Src\Shader.cpp" />
     <ClCompile Include="Src\VertexArray.cpp" />
@@ -161,6 +162,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Src\Camera.h" />
+    <ClInclude Include="Src\Cube.h" />
     <ClInclude Include="Src\IndexBuffer.h" />
     <ClInclude Include="Src\Shader.h" />
     <ClInclude Include="Src\VertexArray.h" />

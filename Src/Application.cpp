@@ -5,6 +5,7 @@
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 #include "Camera.h"
+#include "Cube.h"
 
 
 #include <iostream>
@@ -72,31 +73,9 @@ int main(void)
 
     glViewport(0, 0, 1200, 900);
 
-    const float vertices[] =
-    {
-        //-z face
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.5f, 0.5f, 0.0f,
-        -0.5f, 0.5f, 0.0f
-    };
+    glEnable(GL_DEPTH_TEST);
 
-    const unsigned int Indices[] =
-    {
-        0,1,2,
-        2,3,0
-    };
-
-    VertexArray VAO;
-    VertexBuffer VBO(vertices, sizeof(vertices));
-    IndexBuffer IBO(Indices, sizeof(Indices));
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    VAO.UnBind();
-    VBO.UnBind();
-    IBO.UnBind();
+    Cube cube;
 
     Shader TriShader("shaders/vertexshader.glsl", "shaders/fragmentshader.glsl");
 
@@ -120,8 +99,8 @@ int main(void)
         ProcessInput(window);
 
         /* Render here */
-        glClear(GL_COLOR_BUFFER_BIT);
-        glClearColor(0.0f, 0.5f, 0.5f, 1.0f);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
         glm::mat4 model(1.0f);
         glm::mat4 view = camera.GetViewMatrix();
@@ -129,13 +108,11 @@ int main(void)
 
         model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
 
-        VAO.Bind();
         TriShader.use();
         TriShader.setMat4f("model", model);
         TriShader.setMat4f("view", view);
         TriShader.setMat4f("projection", projection);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        VAO.UnBind();
+        cube.Draw();
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
