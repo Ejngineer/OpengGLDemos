@@ -10,9 +10,20 @@
 #include <iostream>
 #include <string>
 
+struct CursPos
+{
+    double xpos;
+    double ypos;
+};
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+}
+
+void mouse_callback(GLFWwindow* window, Camera* camera, double xpos, double ypos)
+{
+    //camera->camera_mouse_callback(window, xpos, ypos);
 }
 
 void ProcessInput(GLFWwindow* window)
@@ -26,6 +37,8 @@ void ProcessInput(GLFWwindow* window)
 int main(void)
 {
     GLFWwindow* window;
+    Camera camera;
+    CursPos cursPos;
 
     /* Initialize the library */
     if (!glfwInit())
@@ -48,6 +61,8 @@ int main(void)
     glfwMakeContextCurrent(window);
 
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -88,16 +103,18 @@ int main(void)
     double lastframe = 0.0f;
     double currentframe;
     float deltaTime;
-    Camera camera;
+    
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
+        glfwGetCursorPos(window, &cursPos.xpos, &cursPos.ypos);
         currentframe = glfwGetTime();
         deltaTime = float(currentframe) - float(lastframe);
         lastframe = currentframe;
 
         camera.ProcessInput(window, deltaTime);
+        camera.camera_mouse_callback(window, cursPos.xpos, cursPos.ypos);
 
         /*check to see if escape key had been pressed*/
         ProcessInput(window);

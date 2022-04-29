@@ -27,7 +27,6 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath)
 	/*Same as before for fragment shader source code*/
 	FragmentOss << FragmentFile.rdbuf();
 	const std::string FragmentString(FragmentOss.str());
-	std::cout << FragmentString << std::endl;
 
 	/*Store string into char pointer*/
 	const char* VertexCode = VertexString.c_str();
