@@ -4,6 +4,10 @@ void Camera::ProcessInput(GLFWwindow* window, float deltaTime)
 {
 	float speed = 2.5f * deltaTime;
 
+	if(glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+	{
+		speed = 10.0f * deltaTime;
+	}
 	if(glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 	{
 		cameraPos += speed * cameraFront;

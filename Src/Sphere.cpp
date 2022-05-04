@@ -61,6 +61,13 @@ void Sphere::Draw()
 	glBindVertexArray(0);
 }
 
+void Sphere::DrawInstanced(int amount)
+{
+	glBindVertexArray(VAO);
+	glDrawElementsInstanced(GL_TRIANGLES, (unsigned int)Indices.size(), GL_UNSIGNED_INT, 0, amount);
+	glBindVertexArray(0);
+}
+
 
 void Sphere::MakeVerticesFlat()
 {

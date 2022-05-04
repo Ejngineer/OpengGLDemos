@@ -32,6 +32,7 @@ public:
 	Sphere(float radius = 1.0f, int sectors = 36, int stacks = 18, bool smooth = true);
 	void SetUp();
 	void Draw();
+	void DrawInstanced(int amount);
 	void MakeInterleavedVertices();
 	void MakeVerticesFlat();
 	void MakeVerticesSmooth();
@@ -58,6 +59,11 @@ public:
 	const float* GetTexCoords() { return TexCoords.data(); }
 	const float* GetInterleaved() { return InterleavedVertices.data(); }
 	const unsigned int* GetIndices() { return Indices.data(); }
+
+	/*Vertex Array Object Getters*/
+	unsigned int GetVAO() { return VAO; }
+	unsigned int GetVBO() { return VBO; }
+	unsigned int GetEBO() { return EBO; }
 };
 
 #endif

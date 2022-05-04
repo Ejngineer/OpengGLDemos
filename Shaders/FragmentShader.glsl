@@ -4,15 +4,16 @@ out vec4 FragColor;
 
 in vec3 Normal;
 in vec3 FragPos;
+in vec3 inColor;
+in float Spec;
 
 uniform vec3 viewPos;
-uniform vec3 inColor;
 uniform vec3 lightPosition;
 
 void main()
 {
 	vec3 Color = inColor;
-	vec3 lightColor = vec3(0.5, 0.5, 0.5);
+	vec3 lightColor = vec3(0.6, 0.6, 0.6);
 	vec3 lightPos = lightPosition;
 	vec3 normal = normalize(Normal);
 
@@ -27,11 +28,13 @@ void main()
 
 	float specularStrength = 0.5;
 	
-	vec3 reflectDir = reflect(-lightDir, normal);
-	float spec= pow(max(dot(viewDir, reflectDir),0.0),16.0);
+	//vec3 reflectDir = reflect(-lightDir, normal);
+	//float spec= pow(max(dot(viewDir, reflectDir),0.0),hightlight);
 
-	//vec3 halfwayDir = normalize(viewDir + lightDir);
-	//float spec = pow(max(dot(halfwayDir, normal),0.0),64.0);
+	float highlight = pow(2, Spec);
+
+	vec3 halfwayDir = normalize(viewDir + lightDir);
+	float spec = pow(max(dot(halfwayDir, normal),0.0),highlight);
 	
 	vec3 specular = specularStrength * spec * lightColor;
 
