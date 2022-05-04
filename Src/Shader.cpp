@@ -104,13 +104,13 @@ void Shader::setInt3iv(const char* uniform, glm::vec3 values)
 	glUniform3i(loc, values.x, values.y, values.z);
 }
 
-void Shader::setInt3f(const char* uniform, float v0, float v1, float v2)
+void Shader::setFloat3f(const char* uniform, float v0, float v1, float v2)
 {
 	unsigned int loc = glGetUniformLocation(_ID, uniform);
 	glUniform3f(loc, v0, v1, v2);
 }
 
-void Shader::setInt3fv(const char* uniform, glm::vec3 values)
+void Shader::setFloat3fv(const char* uniform, glm::vec3 values)
 {
 	unsigned int loc = glGetUniformLocation(_ID, uniform);
 	glUniform3f(loc, values.x, values.y, values.z);

@@ -156,6 +156,7 @@
     <ClCompile Include="Src\Cube.cpp" />
     <ClCompile Include="Src\IndexBuffer.cpp" />
     <ClCompile Include="Src\Shader.cpp" />
+    <ClCompile Include="Src\Sphere.cpp" />
     <ClCompile Include="Src\VertexArray.cpp" />
     <ClCompile Include="Src\VertexBuffer.cpp" />
     <ClCompile Include="Vendor\glad.c" />
@@ -165,6 +166,7 @@
     <ClInclude Include="Src\Cube.h" />
     <ClInclude Include="Src\IndexBuffer.h" />
     <ClInclude Include="Src\Shader.h" />
+    <ClInclude Include="Src\Sphere.h" />
     <ClInclude Include="Src\VertexArray.h" />
     <ClInclude Include="Src\VertexBuffer.h" />
     <ClInclude Include="Vendor\stb_image.h" />

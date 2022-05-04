@@ -25,10 +25,10 @@ public:
 	void setDouble1d(const char* uniform, double value);
 	void setInt3i(const char* uniform, int v0, int v1, int v2);
 	void setInt3iv(const char* uniform, glm::vec3 values);
-	void setInt3f(const char* uniform, float v0, float v1, float v2);
-	void setInt3fv(const char* uniform, glm::vec3 values);
-	void setInt3d(const char* uniform, double v0, double v1, double v2);
-	void setInt3dv(const char* uniform, glm::vec3 values);
+	void setFloat3f(const char* uniform, float v0, float v1, float v2);
+	void setFloat3fv(const char* uniform, glm::vec3 values);
+	void setDouble3d(const char* uniform, double v0, double v1, double v2);
+	void setDouble3dv(const char* uniform, glm::vec3 values);
 	void setMat4f(const char* uniform, glm::mat4 mat);
 	void use();
 };

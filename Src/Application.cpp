@@ -6,6 +6,8 @@
 #include "IndexBuffer.h"
 #include "Camera.h"
 #include "Cube.h"
+#include "Sphere.h"
+#include "gtx/string_cast.hpp"
 
 
 #include <iostream>
@@ -74,14 +76,47 @@ int main(void)
     glViewport(0, 0, 1200, 900);
 
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_MULTISAMPLE);
 
-    Cube cube;
+
+    glfwWindowHint(GLFW_SAMPLES, 4);
+
+    float quadVertices[] =
+    {
+        //vertices          //Normals
+        -0.5f, 0.0f,-0.5f, 0.0f, 1.0f, 0.0f,
+         0.5f, 0.0f,-0.5f, 0.0f, 1.0f, 0.0f,
+         0.5f, 0.0f, 0.5f, 0.0f, 1.0f, 0.0f,
+        -0.5f, 0.0f, 0.5f, 0.0f, 1.0f, 0.0f
+    };
+
+    unsigned int quadIndices[] =
+    {
+        0,1,2,
+        2,3,0
+    };
+
+    VertexArray VAO;
+    VertexBuffer VBO(quadVertices, sizeof(quadVertices));
+    IndexBuffer IBO(quadIndices, sizeof(quadIndices));
+
+    VAO.Bind();
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+
+    //Cube cube;
+    Sphere sphere(1.0f, 72, 36);
 
     Shader TriShader("shaders/vertexshader.glsl", "shaders/fragmentshader.glsl");
 
     double lastframe = 0.0f;
     double currentframe;
     float deltaTime;
+
+    
     
 
     /* Loop until the user closes the window */
@@ -89,7 +124,7 @@ int main(void)
     {
         glfwGetCursorPos(window, &cursPos.xpos, &cursPos.ypos);
         currentframe = glfwGetTime();
-        deltaTime = float(currentframe) - float(lastframe);
+        deltaTime = float(currentframe) - float(lastframe); 
         lastframe = currentframe;
 
         camera.ProcessInput(window, deltaTime);
@@ -100,19 +135,36 @@ int main(void)
 
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+        glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 
         glm::mat4 model(1.0f);
         glm::mat4 view = camera.GetViewMatrix();
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), 1200.0f / 900.0f, 0.1f, 100.0f);
 
-        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-
         TriShader.use();
+        model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(100.0f, 1.0f, 100.0f));
         TriShader.setMat4f("model", model);
         TriShader.setMat4f("view", view);
         TriShader.setMat4f("projection", projection);
-        cube.Draw();
+        TriShader.setFloat3fv("viewPos", camera.GetCameraPos());
+        TriShader.setFloat3fv("lightPosition", glm::vec3(sinf(glfwGetTime()) * 2, 0.5f, 1.0f));
+        TriShader.setFloat3fv("inColor", glm::vec3(1.0f, 1.0f, 1.0f));
+
+        VAO.Bind();
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        VAO.UnBind();
+
+        model = glm::mat4(1.0f);
+        model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+        model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+        model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+
+        TriShader.setMat4f("model", model);
+        TriShader.setFloat3fv("inColor", glm::vec3(1.0f, 0.0f, 0.0f));
+
+        //cube.Draw();
+        sphere.Draw();
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
@@ -120,6 +172,9 @@ int main(void)
         /* Poll for and process events */
         glfwPollEvents();
     }
+
+    //Delete memory for a model matrix array
+    delete[] modelMatrices;
 
     glfwTerminate();
     return 0;
