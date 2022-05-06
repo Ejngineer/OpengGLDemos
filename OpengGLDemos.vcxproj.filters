@@ -42,6 +42,9 @@
     <ClCompile Include="Src\Sphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\Texture.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vendor\stb_image.h">
@@ -68,9 +71,23 @@
     <ClInclude Include="Src\Sphere.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Src\Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="Shaders\VertexShader.glsl" />
     <None Include="Shaders\FragmentShader.glsl" />
+    <None Include="packages.config" />
+    <None Include="Shaders\FragmentShader1.glsl" />
+    <None Include="Shaders\VertexShader1.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Textures\brickwall.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
+    <Image Include="Textures\brickwall_normal.jpg">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

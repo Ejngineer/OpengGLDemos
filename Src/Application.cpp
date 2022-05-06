@@ -7,7 +7,9 @@
 #include "Camera.h"
 #include "Cube.h"
 #include "Sphere.h"
+#include "Texture.h"
 #include "gtx/string_cast.hpp"
+#include "stb_image.h"
 
 
 #include <iostream>
@@ -81,119 +83,60 @@ int main(void)
 
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
-	float quadVertices[] =
-	{
-		//vertices          //Normals
-		-0.5f, 0.0f,-0.5f, 0.0f, 1.0f, 0.0f,
-		 0.5f, 0.0f,-0.5f, 0.0f, 1.0f, 0.0f,
-		 0.5f, 0.0f, 0.5f, 0.0f, 1.0f, 0.0f,
-		-0.5f, 0.0f, 0.5f, 0.0f, 1.0f, 0.0f
-	};
 
-	unsigned int quadIndices[] =
+	const float vertices[] =
 	{
-		0,1,2,
-		2,3,0
+		//Position          //Normals       //TexCoords  //Tangents
+		-1.0f,-1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f, 0.0f, 0.0f,
+		 1.0f,-1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 0.0f, 2.0f, 0.0f, 0.0f,
+		 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 2.0f, 0.0f, 0.0f,
+		 
+		-1.0f,-1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 2.0f, 0.0f, 0.0f,
+		 1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 1.0f, 1.0f, 2.0f, 0.0f, 0.0f,
+		-1.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 2.0f, 0.0f, 0.0f
 	};
 
 	VertexArray VAO;
-	VertexBuffer VBO(quadVertices, sizeof(quadVertices));
-	IndexBuffer IBO(quadIndices, sizeof(quadIndices));
+	VertexBuffer VBO(vertices, sizeof(vertices));
 
-	VAO.Bind();
-
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(sizeof(float) * 3));
 	glEnableVertexAttribArray(1);
-
-	/* Geometries*/
-	//Cube cube;
-	Sphere sphere(1.0f, 72, 36, true);
-	
-	Shader TriShader("shaders/vertexshader.glsl", "shaders/fragmentshader.glsl");
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(sizeof(float) * 6));
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(float), (void*)(sizeof(float) * 8));
+	glEnableVertexAttribArray(3);
 
 	double lastframe = 0.0f;
 	double currentframe;
 	float deltaTime;
 
-	/*Instancing code*/
-	const unsigned int amount = 16384;
-	glm::mat4 *modelMatrices;
-	modelMatrices = new glm::mat4[amount];
-	//modelMatrices = new glm::mat4[amount];
-	srand(glfwGetTime());
+	Shader SphereShader("shaders/vertexshader.glsl", "shaders/fragmentshader.glsl");
+	Shader SphereShader1("shaders/vertexshader1.glsl", "shaders/fragmentshader1.glsl");
 
-	int index = 0;
-	int offset = 0.1f;
+	Sphere sphere(1.0f, 72, 72, false);
+	Sphere sphere1(1.0f, 144, 144, false);
 
-	for (int z = -256; z < 256; z+=4)
-	{
-		for (int x = -256; x < 256; x+=4)
-		{
-			glm::mat4 model = glm::mat4(1.0f);
-			float y = (rand() % 128);
-			float dx = (rand() % 128) - 64.0f;
-			float dz = (rand() % 128) - 64.0f;
-			model = glm::translate(model, glm::vec3(x, 0.0f, z));
-			//model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
-			model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-			modelMatrices[index] = model;
-			index++;
-		}
-	}
+	Texture BrickWall, BrickWallNorm;
+	BrickWall.Bind();
+	BrickWall.Load("textures/brickwall.jpg");
 
-	/*Instance Array VertexBuffer data*/
-	VertexBuffer InstVBO;
-	InstVBO.setDataStaticf(&modelMatrices[0], amount * sizeof(glm::mat4));
+	BrickWallNorm.Bind();
+	BrickWallNorm.Load("textures/brickwall_normal.jpg");
 
-	/*Add model matrix data to sphere Vertex array object pointers*/
-	unsigned int InstVAO = sphere.GetVAO();
-	glBindVertexArray(InstVAO);
-	glEnableVertexAttribArray(3);
-	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(glm::vec4), (void*)0);
-	glEnableVertexAttribArray(4);
-	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(glm::vec4), (void*)(1 * sizeof(glm::vec4)));
-	glEnableVertexAttribArray(5);
-	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(glm::vec4), (void*)(2 * sizeof(glm::vec4)));
-	glEnableVertexAttribArray(6);
-	glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, 4 * sizeof(glm::vec4), (void*)(3 * sizeof(glm::vec4)));
+	Texture RBrickWall, RBrickWallNorm;
+	RBrickWall.Bind();
+	RBrickWall.Load("textures/Red_Brick_Diffuse.jpg");
+	RBrickWallNorm.Bind();
+	RBrickWallNorm.Load("textures/Red_Brick_Normal.jpg");
+	
+	SphereShader.use();
+	SphereShader.setInt1i("walltext", 0);
+	SphereShader.setInt1i("walltextnorm", 1);
 
-	glVertexAttribDivisor(3, 1);
-	glVertexAttribDivisor(4, 1);
-	glVertexAttribDivisor(5, 1);
-	glVertexAttribDivisor(6, 1);
 
-	InstVBO.UnBind();
-
-	/*Random colors and specular highlight values for instanced objects*/
-	srand(glfwGetTime());
-	float Colors[4 * amount];
-	for (unsigned int i = 0; i < 4 * amount; i+=4)
-	{
-		float r = ((rand() % 225) + 30) / 255.0f;
-		float g = ((rand() % 225) + 30) / 255.0f;
-		float b = ((rand() % 225) + 30) / 255.0f;
-		float pow = (rand() % 9);
-
-		Colors[i] = r;
-		Colors[i + 1] = g;
-		Colors[i + 2] = b;
-		Colors[i + 3] = pow;
-	}
-
-	VertexBuffer ColorBuffer;
-	ColorBuffer.setDataStaticf(Colors, sizeof(Colors));
-
-	glEnableVertexAttribArray(7);
-	glVertexAttribPointer(7, 3, GL_FLOAT, GL_FALSE, 4 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(8);
-	glVertexAttribPointer(8, 1, GL_FLOAT, GL_FALSE, 4 * sizeof(int), (void*)(3 * sizeof(float)));
-
-	glVertexAttribDivisor(7, 1);
-	glVertexAttribDivisor(8, 1);
-
-	ColorBuffer.UnBind();
+	//stbi_set_flip_vertically_on_load(1);
 
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
@@ -215,35 +158,49 @@ int main(void)
 
 		glm::mat4 model(1.0f);
 		glm::mat4 view = camera.GetViewMatrix();
-		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 10000.0f);
+		glm::mat4 projection = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
 
-		TriShader.use();
-		model = glm::translate(model, glm::vec3(0.0f, -1.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(500.0f, 1.0f, 500.0f));
-		TriShader.setInt1i("Instance", false);
-		TriShader.setMat4f("model", model);
-		TriShader.setMat4f("view", view);
-		TriShader.setMat4f("projection", projection);
-		TriShader.setFloat3fv("viewPos", camera.GetCameraPos());
-		TriShader.setFloat3fv("lightPosition", glm::vec3(1.0f, 100.0f, 1.0f));
-		//TriShader.setFloat3fv("inColor", glm::vec3(1.0f, 1.0f, 1.0f));
+		/*Use shader program*/
+		SphereShader.use();
+		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		SphereShader.setMat4f("model", model);
+		SphereShader.setMat4f("view", view);
+		SphereShader.setMat4f("projection", projection);
+		SphereShader.setFloat3fv("viewPos", camera.GetCameraPos());
+		SphereShader.setFloat3fv("lightPos", glm::vec3(1.0f, 1.0f, 3.0f));
+		SphereShader.setInt1i("Divisions", 3);
+
+		/*Activate our textures*/
+		BrickWall.ActivateTexture2D(0);
+		BrickWall.Bind();
+		BrickWallNorm.ActivateTexture2D(1);
+		BrickWallNorm.Bind();
 
 		//VAO.Bind();
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		//glDrawArrays(GL_TRIANGLES,0, 6);
 		//VAO.UnBind();
+		sphere.Draw();
 
+		SphereShader.use();
 		model = glm::mat4(1.0f);
-		model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
-		model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
+		model = glm::translate(model, glm::vec3(2.5f, 0.0f, 0.0f));
+		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+		SphereShader.setMat4f("model", model);
+		SphereShader.setMat4f("view", view);
+		SphereShader.setMat4f("projection", projection);
+		SphereShader.setFloat3fv("viewPos", camera.GetCameraPos());
+		SphereShader.setFloat3fv("lightPos", glm::vec3(1.0f, 1.0f, 3.0f));
+		SphereShader.setInt1i("Divisions", 2.5);
 		
-
-		//TriShader.setMat4f("model", model);
-		//TriShader.setFloat3fv("inColor", glm::vec3(0.0f, 1.0f, 0.0f));
-		TriShader.setInt1i("Instance", true);
-
-		//cube.Draw();
-		//sphere.Draw();
-		sphere.DrawInstanced(amount);
+		RBrickWall.ActivateTexture2D(0);
+		RBrickWall.Bind();
+		RBrickWallNorm.ActivateTexture2D(1);
+		RBrickWallNorm.Bind();
+		//VAO.Bind();
+		//glDrawArrays(GL_TRIANGLES, 0, 6);
+		//VAO.UnBind();
+		sphere.Draw();
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);

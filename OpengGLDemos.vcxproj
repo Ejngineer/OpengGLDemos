@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="packages\Microsoft.Windows.CppWinRT.2.0.210806.1\build\native\Microsoft.Windows.CppWinRT.props" Condition="Exists('packages\Microsoft.Windows.CppWinRT.2.0.210806.1\build\native\Microsoft.Windows.CppWinRT.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -157,6 +158,7 @@
     <ClCompile Include="Src\IndexBuffer.cpp" />
     <ClCompile Include="Src\Shader.cpp" />
     <ClCompile Include="Src\Sphere.cpp" />
+    <ClCompile Include="Src\Texture.cpp" />
     <ClCompile Include="Src\VertexArray.cpp" />
     <ClCompile Include="Src\VertexBuffer.cpp" />
     <ClCompile Include="Vendor\glad.c" />
@@ -167,15 +169,31 @@
     <ClInclude Include="Src\IndexBuffer.h" />
     <ClInclude Include="Src\Shader.h" />
     <ClInclude Include="Src\Sphere.h" />
+    <ClInclude Include="Src\Texture.h" />
     <ClInclude Include="Src\VertexArray.h" />
     <ClInclude Include="Src\VertexBuffer.h" />
     <ClInclude Include="Vendor\stb_image.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Shaders\FragmentShader.glsl" />
+    <None Include="Shaders\FragmentShader1.glsl" />
     <None Include="Shaders\VertexShader.glsl" />
+    <None Include="Shaders\VertexShader1.glsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Textures\brickwall.jpg" />
+    <Image Include="Textures\brickwall_normal.jpg" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="packages\Microsoft.Windows.CppWinRT.2.0.210806.1\build\native\Microsoft.Windows.CppWinRT.targets" Condition="Exists('packages\Microsoft.Windows.CppWinRT.2.0.210806.1\build\native\Microsoft.Windows.CppWinRT.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\Microsoft.Windows.CppWinRT.2.0.210806.1\build\native\Microsoft.Windows.CppWinRT.props')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Windows.CppWinRT.2.0.210806.1\build\native\Microsoft.Windows.CppWinRT.props'))" />
+    <Error Condition="!Exists('packages\Microsoft.Windows.CppWinRT.2.0.210806.1\build\native\Microsoft.Windows.CppWinRT.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\Microsoft.Windows.CppWinRT.2.0.210806.1\build\native\Microsoft.Windows.CppWinRT.targets'))" />
+  </Target>
 </Project>

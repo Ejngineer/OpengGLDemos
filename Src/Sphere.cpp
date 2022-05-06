@@ -14,7 +14,7 @@ Sphere::Sphere(float radius, int sectors, int stacks, bool smooth)
 {
 	this->radius = radius;
 	this->sectors = sectors;
-
+	this->smooth = smooth;
 	if (sectors < MIN_SECTORS)
 		this->sectors = MIN_SECTORS;
 
@@ -44,14 +44,31 @@ void Sphere::SetUp()
 
 	glGenBuffers(1, &EBO);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-glBufferData(GL_ELEMENT_ARRAY_BUFFER, (unsigned int)Indices.size() * sizeof(unsigned int), GetIndices(), GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, (unsigned int)Indices.size() * sizeof(unsigned int), GetIndices(), GL_STATIC_DRAW);
 
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float),  (void*)0);
-	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3* sizeof(float)));
-	glEnableVertexAttribArray(2);
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	if(!smooth)
+	{
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(6 * sizeof(float)));
+
+		glEnableVertexAttribArray(3);
+		glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(8 * sizeof(float)));
+		glEnableVertexAttribArray(4);
+		glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, 14 * sizeof(float), (void*)(11 * sizeof(float)));
+	}
+	else
+	{
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
+	}
 }
 
 void Sphere::Draw()
@@ -139,9 +156,20 @@ void Sphere::MakeVerticesFlat()
 					v4.x, v4.y, v4.z
 				);
 
+				std::vector<float> BT = CalcTangent(
+					v1.x, v1.y, v1.z,
+					v2.x, v2.y, v2.z,
+					v4.x, v4.y, v4.z,
+					v1.s, v1.t,
+					v2.s, v2.t,
+					v4.s, v4.t
+				);
+
 				for (k = 0; k < 3; k++)
 				{
 					addNormal(N[0], N[1], N[2]);
+					addTangent(BT[0], BT[1], BT[2]);
+					addBiTangent(BT[3], BT[4], BT[5]);
 				}
 
 				addIndices(index, index + 1, index + 2);
@@ -165,9 +193,20 @@ void Sphere::MakeVerticesFlat()
 					v3.x, v3.y, v3.z
 				);
 
+				std::vector<float> BT = CalcTangent(
+					v1.x, v1.y, v1.z,
+					v2.x, v2.y, v2.z,
+					v3.x, v3.y, v3.z,
+					v1.s, v1.t,
+					v2.s, v2.t,
+					v3.s, v3.t
+				);
+
 				for (k = 0; k < 3; k++)
 				{
 					addNormal(N[0], N[1], N[2]);
+					addTangent(BT[0], BT[1], BT[2]);
+					addBiTangent(BT[3], BT[4], BT[5]);
 				}
 
 				addIndices(index, index + 1, index + 2);
@@ -187,11 +226,26 @@ void Sphere::MakeVerticesFlat()
 				addTexCoord(v4.s, v4.t);
 
 				std::vector<float> N;
-				N = CalcNormal(v1.x, v1.y, v1.z, v2.x, v2.y, v2.z, v3.x, v3.y, v3.z);
+				N = CalcNormal(
+					v1.x, v1.y, v1.z,
+					v2.x, v2.y, v2.z,
+					v3.x, v3.y, v3.z
+				);
 
-				for (int k = 0; k < 4; k++)
+				std::vector<float> BT = CalcTangent(
+					v1.x, v1.y, v1.z,
+					v2.x, v2.y, v2.z,
+					v3.x, v3.y, v3.z,
+					v1.s, v1.t,
+					v2.s, v2.t,
+					v3.s, v3.t
+				);
+
+				for (k = 0; k < 4; k++)
 				{
 					addNormal(N[0], N[1], N[2]);
+					addTangent(BT[0], BT[1], BT[2]);
+					addBiTangent(BT[3], BT[4], BT[5]);
 				}
 
 				addIndices(index, index + 1, index + 2);
@@ -282,8 +336,19 @@ void Sphere::MakeInterleavedVertices()
 
 		InterleavedVertices.push_back(TexCoords[j]);
 		InterleavedVertices.push_back(TexCoords[j + 1]);
-	}
 
+		if (!smooth)
+		{
+			InterleavedVertices.push_back(Tangents[i]);
+			InterleavedVertices.push_back(Tangents[i + 1]);
+			InterleavedVertices.push_back(Tangents[i + 2]);
+
+			InterleavedVertices.push_back(BiTangents[i]);
+			InterleavedVertices.push_back(BiTangents[i + 1]);
+			InterleavedVertices.push_back(BiTangents[i + 2]);
+
+		}
+	}
 }
 
 std::vector<float> Sphere::CalcNormal(float x1, float y1, float z1, float x2, float y2, float z2, float x3, float y3, float z3)
@@ -316,6 +381,55 @@ std::vector<float> Sphere::CalcNormal(float x1, float y1, float z1, float x2, fl
 
 }
 
+std::vector<float> Sphere::CalcTangent(
+	float x1, float y1, float z1, 
+	float x2, float y2, float z2, 
+	float x3, float y3, float z3,
+	float uv1x, float uv1y,
+	float uv2x, float uv2y,
+	float uv3x, float uv3y
+
+)
+{
+	std::vector<float> tmpTangents;
+	float Tx, Ty, Tz, Bx, By, Bz;
+	float e1x, e2x, e1y, e2y, e1z, e2z;
+	float d1x, d2x, d1y, d2y;
+
+	e1x = x2 - x1;
+	e1y = y2 - y1;
+	e1z = z2 - z1;
+	e2x = x3 - x1;
+	e2y	= y3 - y1;
+	e2z	= z3 - z1;
+
+	d1x = uv2x - uv1x;
+	d1y = uv2y - uv1y;
+	d2x = uv3x - uv1x;
+	d2y = uv3y - uv1y;
+
+	float r = 1.0f / (d1x * d2y - d2x * d1y);
+
+	Tx = r * (d2y * e1x - d1y * e2x);
+	Ty = r * (d2y * e1y - d1y * e2y);
+	Tz = r * (d2y * e1z - d1y * e2z);
+
+	tmpTangents.push_back(Tx);
+	tmpTangents.push_back(Ty);
+	tmpTangents.push_back(Tz);
+
+
+	Bx = r *(-d2x * e1x + d1x * e2x);
+	By = r *(-d2x * e1y + d1x * e2y);
+	Bz = r *(-d2x * e1z + d1x * e2z);
+
+	tmpTangents.push_back(Bx);
+	tmpTangents.push_back(By);
+	tmpTangents.push_back(Bz);
+
+	return tmpTangents;
+}
+
 void Sphere::addVertex(float x1, float y1, float z1)
 {
 	Vertices.push_back(x1);
@@ -328,6 +442,20 @@ void Sphere::addNormal(float x, float y, float z)
 	Normals.push_back(x);
 	Normals.push_back(y);
 	Normals.push_back(z);
+}
+
+void Sphere::addTangent(float x, float y, float z)
+{
+	Tangents.push_back(x);
+	Tangents.push_back(y);
+	Tangents.push_back(z);
+}
+
+void Sphere::addBiTangent(float x, float y, float z)
+{
+	BiTangents.push_back(x);
+	BiTangents.push_back(y);
+	BiTangents.push_back(z);
 }
 
 void Sphere::addTexCoord(float x, float y)
