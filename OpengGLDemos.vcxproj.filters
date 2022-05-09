@@ -45,6 +45,12 @@
     <ClCompile Include="Src\Texture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Src\quadSphere.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Src\CubeSphere.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Vendor\stb_image.h">
@@ -72,6 +78,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Src\Texture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\quadSphere.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Src\CubeSphere.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

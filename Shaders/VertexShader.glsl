@@ -4,7 +4,7 @@ layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aNormal;
 layout (location = 2) in vec2 aTexCoords;
 layout (location = 3) in vec3 aTangents;
-//layout (location = 4) in vec3 aBiTangents;
+layout (location = 4) in vec3 aBiTangents;
 
 uniform mat4 model;
 uniform mat4 view;
@@ -23,13 +23,14 @@ out mat3 TBN;
 void main()
 {
 	mat3 normalMatrix = transpose(inverse(mat3(model)));
-	vec3 T = normalize(normalMatrix * aTangents);
-	//vec3 B = normalize(normalMatrix * aBiTangents);
-	vec3 N = normalize(normalMatrix * aNormal);
-	vec3 B = cross(N,T);
-	T = normalize(T - dot(T, N) * N);
+	vec3 T = normalize(mat3(model) * aTangents);
+	vec3 B = normalize(mat3(model) * aBiTangents);
+	vec3 N = normalize(mat3(model) * aNormal);
+	//vec3 B = cross(T,N);
+	//T = normalize(T - dot(T, N) * N);
 	
 	TBN = transpose(mat3(T,B,N));
+	Normal = normalMatrix * aNormal;
 
 	FragPos = TBN * vec3(model * vec4(aPos, 1.0));
 	viewPosOut = TBN * viewPos;
