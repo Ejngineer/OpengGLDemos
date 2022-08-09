@@ -12,6 +12,9 @@
 #include "stb_image.h"
 #include "CubeSphere.h"
 #include "quadSphere.h"
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
 
 
 #include <iostream>
@@ -69,7 +72,7 @@ int main(void)
 
 	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+	//glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
 	{
@@ -85,6 +88,10 @@ int main(void)
 
 	glfwWindowHint(GLFW_SAMPLES, 4);
 
+	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 330");
 
 	//const float vertices[] =
 	//{
@@ -222,10 +229,19 @@ int main(void)
 
 	float heightscale = 0.0f;
 
+	float Height1 = 0.0f;
+	float Height2 = 0.0f;
+	float Height3 = 0.0f;
+	int Divisions1 = 1;
+	int Divisions2 = 1;
+	int Divisions3 = 1;
+
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
-
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
 
 		glfwGetCursorPos(window, &cursPos.xpos, &cursPos.ypos);
 		currentframe = glfwGetTime();
@@ -233,30 +249,22 @@ int main(void)
 		lastframe = currentframe;
 
 		camera.ProcessInput(window, deltaTime);
-		camera.camera_mouse_callback(window, cursPos.xpos, cursPos.ypos);
+		//camera.camera_mouse_callback(window, cursPos.xpos, cursPos.ypos);
 
 		/*check to see if escape key had been pressed*/
 		ProcessInput(window);
 		
-		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-		{
-			if (heightscale <= 0.1f)
-			{
-				heightscale += 0.001f;
-			}
-		}
-
-		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-		{
-			if (heightscale >= 0.0)
-			{
-				heightscale -= 0.001f;
-			}
-		}
-
 		/* Render here */
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+		ImGui::Begin("Options");
+		//ImGui::SliderFloat("Height 1", &Height1, 0.0f, 1.0f, "%.5f");
+		ImGui::SliderFloat("Height 2", &Height2, 0.0f, 1.0f, "%.5f");
+		ImGui::SliderFloat("Height 3", &Height3, 0.0f, 1.0f, "%.5f");
+		ImGui::SliderInt("Divisions 1", &Divisions1, 1.0f, 5.0f);
+		ImGui::SliderInt("Divisions 2", &Divisions2, 1.0f, 5.0f);
+		ImGui::SliderInt("Divisions 3", &Divisions3, 1.0f, 5.0f);
 
 		stbi_set_flip_vertically_on_load(0);
 
@@ -273,8 +281,8 @@ int main(void)
 		SphereShader.setMat4f("projection", projection);
 		SphereShader.setFloat3fv("viewPos", camera.GetCameraPos());
 		SphereShader.setFloat3fv("lightPos", glm::vec3(3.0f, 1.0f, 3.0f));
-		SphereShader.setInt1i("Divisions", 3);
-		SphereShader.setFloat1f("height_scale", 0.0f);
+		SphereShader.setInt1i("Divisions", Divisions1);
+		SphereShader.setFloat1f("height_scale", Height1);
 
 		/*Activate our textures*/
 		BrickWall.ActivateTexture2D(0);
@@ -288,8 +296,8 @@ int main(void)
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		
 		SphereShader.setMat4f("model", model);
-		SphereShader.setInt1i("Divisions", 4);
-		SphereShader.setFloat1f("height_scale", heightscale);
+		SphereShader.setInt1i("Divisions", Divisions2);
+		SphereShader.setFloat1f("height_scale", Height2);
 		ParallaxWall.ActivateTexture2D(0);
 		ParallaxWall.Bind();
 		ParallaxWallNorm.ActivateTexture2D(1);
@@ -302,7 +310,8 @@ int main(void)
 		model = glm::translate(model, glm::vec3(6.0f, 0.0f, 0.0f));
 		model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 		SphereShader.setMat4f("model", model);
-		SphereShader.setInt1i("Divisions", 6);
+		SphereShader.setInt1i("Divisions", Divisions3);
+		SphereShader.setFloat1f("height_scale", Height3);
 		RBrickWall.ActivateTexture2D(0);
 		RBrickWall.Bind();
 		RBrickWallNorm.ActivateTexture2D(1);
@@ -315,16 +324,25 @@ int main(void)
 		//VAO.UnBind();
 		Sphere.Draw();
 
+		ImGui::End();
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
 
 		/* Poll for and process events */
 		glfwPollEvents();
+
+		
 	}
 
 	//Delete memory for a model matrix array
 	//delete[] modelMatrices;
+
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	glfwTerminate();
 	return 0;
